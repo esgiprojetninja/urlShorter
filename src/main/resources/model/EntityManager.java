@@ -33,7 +33,7 @@ public class EntityManager {
         this.conn = null;
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            this.conn = DriverManager.getConnection("jdbc:mysql://192.168.10.10/urlShorter?" + "user=shortenme&password=secret");
+            this.conn = DriverManager.getConnection("jdbc:mysql://192.168.10.10/url_shorter?" + "user=shortenme&password=secret");
         } catch (ClassNotFoundException e) {
             System.err.println("Driver non chargé !");
             e.printStackTrace();
@@ -121,6 +121,36 @@ public class EntityManager {
             e.printStackTrace();
         }
         return entities;
+    }
+
+    public void save() throws SQLException {
+        this.createStatement();
+        StringBuilder saveQuery = new StringBuilder("INSERT INTO" + this.tableName + " (");
+        Integer attributeListLength = this.attributes.size();
+        int i = 0;
+        for (Attribute attribute : this.attributes) {
+            saveQuery.append(attribute.getName());
+            if (i < attributeListLength) {
+                saveQuery.append(", ");
+            } else {
+                saveQuery.append(")");
+            }
+        }
+        saveQuery.append(" VALUES (");
+        for (Attribute attribute : this.attributes) {
+            saveQuery.append(attribute.getValue());
+            if (i < attributeListLength) {
+                saveQuery.append(", ");
+            } else {
+                saveQuery.append(");");
+            }
+        }
+        try {
+            this.stmt.executeUpdate(saveQuery.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        this.closeStatement();
     }
 
     private void closeStatement() {

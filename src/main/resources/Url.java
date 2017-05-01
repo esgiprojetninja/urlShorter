@@ -1,11 +1,25 @@
+import model.Attribute;
+import model.EntityManager;
+
+import java.io.Serializable;
+import java.sql.SQLException;
+
 /**
  * Created by roland on 28/04/2017.
  */
-public class Url {
+public class Url extends EntityManager implements Serializable {
     private String base_url;
     private String shorter_url;
     private Integer id;
     private Integer user_id;
+
+    public Url() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
+        super();
+        this.setTableName("urls");
+        this.addAttribute(new Attribute("base_url", "longtext"));
+        this.addAttribute(new Attribute("shorter_url", "varchar"));
+        this.addAttribute(new Attribute("user_id", "int"));
+    }
 
     @Override
     public String toString() {
