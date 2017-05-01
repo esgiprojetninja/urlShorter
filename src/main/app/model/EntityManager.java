@@ -7,15 +7,17 @@ import org.w3c.dom.Attr;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class EntityManager {
     private Connection conn = null;
     private Statement stmt = null;
-    private Map<String, Attribute> attributes;
+    protected Map<String, Attribute> attributes = new HashMap<>();
     private String tableName;
 
     public EntityManager() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
+        this.addAttribute(new Attribute("id", "int"));
         try {
             this.connect();
         } catch (ClassNotFoundException | SQLException | IllegalAccessException | InstantiationException e) {
@@ -25,6 +27,7 @@ public class EntityManager {
 
     public EntityManager(String tableName) throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
         this.setTableName(tableName);
+        this.addAttribute(new Attribute("id", "int"));
         try {
             this.connect();
         } catch (ClassNotFoundException | SQLException | IllegalAccessException | InstantiationException e) {
@@ -35,8 +38,10 @@ public class EntityManager {
     private void connect() throws ClassNotFoundException, SQLException, IllegalAccessException, InstantiationException {
         this.conn = null;
         try {
+            // Class.forName("com.mysql.jdbc.Driver").newInstance();
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             this.conn = DriverManager.getConnection("jdbc:mysql://192.168.10.10/url_shorter?" + "user=shortenme&password=secret");
+            this.createTableIfNotExist();
         } catch (ClassNotFoundException e) {
             System.err.println("Driver non chargé !");
             e.printStackTrace();
@@ -128,7 +133,7 @@ public class EntityManager {
         return entities;
     }
 
-    public void save() throws SQLException {
+    public boolean save() throws SQLException {
         this.createStatement();
         StringBuilder saveQuery = new StringBuilder("INSERT INTO" + this.tableName + " (");
         Integer attributeListLength = this.attributes.size();
@@ -158,10 +163,13 @@ public class EntityManager {
         }
         try {
             this.stmt.executeUpdate(saveQuery.toString());
+            this.closeStatement();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            this.closeStatement();
+            return false;
         }
-        this.closeStatement();
     }
 
     private void closeStatement() {

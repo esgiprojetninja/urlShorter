@@ -1,12 +1,8 @@
-import model.Attribute;
-import model.EntityManager;
+package model;
 
 import java.io.Serializable;
 import java.sql.SQLException;
 
-/**
- * Created by roland on 28/04/2017.
- */
 public class Url extends EntityManager implements Serializable {
     private String base_url;
     private String shorter_url;
@@ -23,7 +19,7 @@ public class Url extends EntityManager implements Serializable {
 
     @Override
     public String toString() {
-        return "Url{" +
+        return "model.Url{" +
                 "base_url='" + base_url + '\'' +
                 ", shorter_url='" + shorter_url + '\'' +
                 ", id=" + id +
@@ -37,6 +33,7 @@ public class Url extends EntityManager implements Serializable {
 
     public void setBase_url(String base_url) {
         this.base_url = base_url;
+        this.attributes.get("base_url").setValue(base_url);
     }
 
     public String getShorter_url() {

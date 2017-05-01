@@ -11,13 +11,13 @@ public class Attribute {
     private String type;
     private Object value;
 
-    public Attribute () {
-
-    }
-
     public Attribute(String name, String type) {
         this.name = name;
-        this.type = type;
+        try {
+            this.setType(type);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Attribute (String name, Object value) {
@@ -56,6 +56,7 @@ public class Attribute {
     }
 
     public String getSQLColumnConstructor () {
+        System.out.println(this.type);
         switch (this.type) {
             case "int":
                 return " INT(6) ";
