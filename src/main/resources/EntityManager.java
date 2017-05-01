@@ -5,7 +5,6 @@
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class EntityManager {
     private Connection conn = null;
@@ -16,7 +15,6 @@ public class EntityManager {
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             this.conn = DriverManager.getConnection("jdbc:mysql://192.168.10.10/urlShorter?" + "user=shortenme&password=secret");
-            this.createTableIfNotExist();
         } catch (ClassNotFoundException e) {
             System.err.println("Driver non chargé !");
             e.printStackTrace();
@@ -28,7 +26,7 @@ public class EntityManager {
         }
     }
 
-    public void createTableIfNotExist (String tableName, Map entity) throws SQLException {
+    public void createTableIfNotExist (String tableName, Map<String, String> entity) throws SQLException {
         this.createStatement();
         String strQuery = "SHOW TABLES;";
         ResultSet rsTables = this.stmt.executeQuery(strQuery);
@@ -40,18 +38,17 @@ public class EntityManager {
                 }
             }
             if (!tableExist) {
-                entity.forEach(new BiConsumer() {
-                    @Override
-                    public void accept(Object k, Object v) {
+                StringBuilder createTableQuery = new StringBuilder("CREATE TABLE " + entity.get("table_name") + " (" +
+                        "id INT PRIMARY KEY AUTO_INCREMENT,");
+                for (Map.Entry<String, String> entry: entity.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    if (key.compareTo("table_name") != 0) {
+                        createTableQuery.append(key).append(" ").append(value);
                     }
-                });
-                String createTableQuery = "CREATE TABLE urls (" +
-                        "id INT PRIMARY KEY AUTO_INCREMENT," +
-                        "user_id INT," +
-                        "base_url LONGTEXT" +
-                        "shorter_url VARCHAR(255)" +
-                        ");";
-                this.stmt.executeUpdate(createTableQuery);
+                }
+                createTableQuery.append(");");
+                this.stmt.executeUpdate(createTableQuery.toString());
             }
         } catch (SQLException e) {
             e.printStackTrace();
