@@ -1,12 +1,10 @@
+package model;
 /**
  * Created by roland on 28/04/2017.
  */
 
-import model.Attribute;
-
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class EntityManager {
     private Connection conn = null;
@@ -92,40 +90,37 @@ public class EntityManager {
         this.closeStatement();
     }
 
-    public Url getUrl(String shorter_url) throws SQLException {
+    public void find(int id) throws SQLException {
         this.createStatement();
-        String userQuery = String.format("SELECT * from urls WHERE shorter_url = '%s'", shorter_url);
-        ResultSet sqlUrl = this.stmt.executeQuery(userQuery);
-        Url url = new Url();
-        if (sqlUrl.next()) {
-            url.setBase_url(sqlUrl.getString("base_url"));
-            url.setId(sqlUrl.getInt("id"));
-            url.setUser_id(sqlUrl.getInt("user_id"));
-            url.setShorter_url((sqlUrl.getString("shorter_url")));
+        String queryString = String.format("SELECT * from " + this.tableName + " WHERE id = '%d'", id);
+        ResultSet sqlQuery = this.stmt.executeQuery(queryString);
+        if (sqlQuery.next()) {
+            for (Attribute attribute : this.attributes) {
+                attribute.setValueFromResultSet(sqlQuery);
+            }
         }
-        return url;
+        this.stmt.close();
     }
 
-    public ArrayList getAll() throws SQLException {
-        ArrayList<String> items = new ArrayList<>();
+    public ArrayList<EntityManager> getAll() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+        ArrayList<EntityManager> entities = new ArrayList<>();
         try {
             this.createStatement();
-            String listUserQuery = "SELECT * FROM urls;";
-            ResultSet urlList = this.stmt.executeQuery(listUserQuery);
-            while(urlList.next()) {
-                users.add(
-                        "id: " + urlList.getInt("id")
-                                + " shorter_url: " + urlList.getString("shorter_url")
-                                + " base_url: " + urlList.getString("base_url")
-                                + " user_id: " + urlList.getInt("user_id")
-                                + "\n"
-                );
+            String listUserQuery = "SELECT * FROM " + this.tableName + " ;";
+            ResultSet entitySQLList = this.stmt.executeQuery(listUserQuery);
+            while(entitySQLList.next()) {
+                EntityManager entity = new EntityManager(this.tableName);
+                for (Attribute attribute: this.attributes) {
+                    attribute.setValueFromResultSet(entitySQLList);
+                    entity.addAttribute(attribute);
+                }
+                entities.add(entity);
             }
             this.closeStatement();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return users;
+        return entities;
     }
 
     private void closeStatement() {
