@@ -3,13 +3,16 @@ package model;
  * Created by roland on 28/04/2017.
  */
 
+import org.w3c.dom.Attr;
+
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class EntityManager {
     private Connection conn = null;
     private Statement stmt = null;
-    private ArrayList<Attribute> attributes;
+    private Map<String, Attribute> attributes;
     private String tableName;
 
     public EntityManager() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
@@ -53,12 +56,12 @@ public class EntityManager {
         this.tableName = tableName;
     }
 
-    public void setAttributes (ArrayList<Attribute> attributes) {
+    public void setAttributes (Map<String, Attribute> attributes) {
         this.attributes = attributes;
     }
 
     public void addAttribute(Attribute attribute) {
-        this.attributes.add(attribute);
+        this.attributes.put(attribute.getName(), attribute);
     }
 
     public void createTableIfNotExist () throws SQLException {
@@ -75,7 +78,8 @@ public class EntityManager {
             if (!tableExist) {
                 StringBuilder createTableQuery = new StringBuilder("CREATE TABLE " + this.tableName + " (" +
                         "id INT PRIMARY KEY AUTO_INCREMENT,");
-                for (Attribute attribute: this.attributes) {
+                for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
+                    Attribute attribute = entry.getValue();
                     createTableQuery
                             .append(attribute.getName())
                             .append(" ")
@@ -95,8 +99,8 @@ public class EntityManager {
         String queryString = String.format("SELECT * from " + this.tableName + " WHERE id = '%d'", id);
         ResultSet sqlQuery = this.stmt.executeQuery(queryString);
         if (sqlQuery.next()) {
-            for (Attribute attribute : this.attributes) {
-                attribute.setValueFromResultSet(sqlQuery);
+            for (Map.Entry<String, Attribute> entry : this.attributes.entrySet()) {
+                entry.getValue().setValueFromResultSet(sqlQuery);
             }
         }
         this.stmt.close();
@@ -110,7 +114,8 @@ public class EntityManager {
             ResultSet entitySQLList = this.stmt.executeQuery(listUserQuery);
             while(entitySQLList.next()) {
                 EntityManager entity = new EntityManager(this.tableName);
-                for (Attribute attribute: this.attributes) {
+                for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
+                    Attribute attribute = entry.getValue();
                     attribute.setValueFromResultSet(entitySQLList);
                     entity.addAttribute(attribute);
                 }
@@ -128,21 +133,27 @@ public class EntityManager {
         StringBuilder saveQuery = new StringBuilder("INSERT INTO" + this.tableName + " (");
         Integer attributeListLength = this.attributes.size();
         int i = 0;
-        for (Attribute attribute : this.attributes) {
-            saveQuery.append(attribute.getName());
-            if (i < attributeListLength) {
-                saveQuery.append(", ");
-            } else {
-                saveQuery.append(")");
+        for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
+            Attribute attribute = entry.getValue();
+            if (attribute.getName().compareTo("id") != 0) {
+                saveQuery.append(attribute.getName());
+                if (i < attributeListLength) {
+                    saveQuery.append(", ");
+                } else {
+                    saveQuery.append(")");
+                }
             }
         }
         saveQuery.append(" VALUES (");
-        for (Attribute attribute : this.attributes) {
-            saveQuery.append(attribute.getValue());
-            if (i < attributeListLength) {
-                saveQuery.append(", ");
-            } else {
-                saveQuery.append(");");
+        for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
+            Attribute attribute = entry.getValue();
+            if (attribute.getName().compareTo("id") != 0) {
+                saveQuery.append(attribute.getValue());
+                if (i < attributeListLength) {
+                    saveQuery.append(", ");
+                } else {
+                    saveQuery.append(");");
+                }
             }
         }
         try {
