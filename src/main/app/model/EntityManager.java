@@ -152,7 +152,12 @@ public class EntityManager {
         for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
             Attribute attribute = entry.getValue();
             if (attribute.getName().compareTo("id") != 0) {
-                saveQuery.append(attribute.getValue());
+                if (attribute.getType().compareTo("varchar") == 0 ||
+                        attribute.getType().compareTo("longtext") == 0) {
+                    saveQuery.append("'").append(attribute.getValue()).append("'");
+                } else {
+                    saveQuery.append(attribute.getValue());
+                }
                 if (i < attributeListLength) {
                     saveQuery.append(", ");
                 } else {
@@ -162,6 +167,7 @@ public class EntityManager {
             i++;
         }
         try {
+            System.out.println(saveQuery.toString());
             this.stmt.executeUpdate(saveQuery.toString());
             this.closeStatement();
             return true;
