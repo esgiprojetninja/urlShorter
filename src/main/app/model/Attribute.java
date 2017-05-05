@@ -59,11 +59,11 @@ public class Attribute {
         System.out.println(this.type);
         switch (this.type) {
             case "int":
-                return " INT(6) ";
+                return "INT(6)";
             case "longtext":
-                return " LONGTEXT ";
+                return "LONGTEXT";
             case "varchar":
-                return " VARCHAR(255) ";
+                return "VARCHAR(255)";
             default:
                 return "";
         }

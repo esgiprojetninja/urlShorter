@@ -15,6 +15,11 @@ public class Url extends EntityManager implements Serializable {
         this.addAttribute(new Attribute("base_url", "longtext"));
         this.addAttribute(new Attribute("shorter_url", "varchar"));
         this.addAttribute(new Attribute("user_id", "int"));
+        try {
+            this.connect();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     @Override

@@ -18,24 +18,14 @@ public class EntityManager {
 
     public EntityManager() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
         this.addAttribute(new Attribute("id", "int"));
-        try {
-            this.connect();
-        } catch (ClassNotFoundException | SQLException | IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
-        }
     }
 
     public EntityManager(String tableName) throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
         this.setTableName(tableName);
         this.addAttribute(new Attribute("id", "int"));
-        try {
-            this.connect();
-        } catch (ClassNotFoundException | SQLException | IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
-        }
     }
 
-    private void connect() throws ClassNotFoundException, SQLException, IllegalAccessException, InstantiationException {
+    protected void connect() throws ClassNotFoundException, SQLException, IllegalAccessException, InstantiationException {
         this.conn = null;
         try {
             // Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -57,9 +47,7 @@ public class EntityManager {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
+    public void setTableName(String tableName) throws SQLException { this.tableName = tableName; }
 
     public void setAttributes (Map<String, Attribute> attributes) {
         this.attributes = attributes;
@@ -83,14 +71,23 @@ public class EntityManager {
             if (!tableExist) {
                 StringBuilder createTableQuery = new StringBuilder("CREATE TABLE " + this.tableName + " (" +
                         "id INT PRIMARY KEY AUTO_INCREMENT,");
+                int i = 1;
+                int attributeListSize = this.attributes.size() - 1; // Id is hardcoded upper.
                 for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
                     Attribute attribute = entry.getValue();
-                    createTableQuery
-                            .append(attribute.getName())
-                            .append(" ")
-                            .append(attribute.getSQLColumnConstructor());
+                    if(attribute.getName().compareTo("id") != 0) {
+                        createTableQuery
+                                .append(attribute.getName())
+                                .append(" ")
+                                .append(attribute.getSQLColumnConstructor());
+                        if (i < attributeListSize) {
+                            createTableQuery.append(", ");
+                        }
+                        i++;
+                    }
                 }
                 createTableQuery.append(");");
+                System.out.println(createTableQuery.toString());
                 this.stmt.executeUpdate(createTableQuery.toString());
             }
         } catch (SQLException e) {
@@ -135,9 +132,9 @@ public class EntityManager {
 
     public boolean save() throws SQLException {
         this.createStatement();
-        StringBuilder saveQuery = new StringBuilder("INSERT INTO" + this.tableName + " (");
+        StringBuilder saveQuery = new StringBuilder("INSERT INTO " + this.tableName + " (");
         Integer attributeListLength = this.attributes.size();
-        int i = 0;
+        int i = 1;
         for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
             Attribute attribute = entry.getValue();
             if (attribute.getName().compareTo("id") != 0) {
@@ -148,8 +145,10 @@ public class EntityManager {
                     saveQuery.append(")");
                 }
             }
+            i++;
         }
         saveQuery.append(" VALUES (");
+        i = 1;
         for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
             Attribute attribute = entry.getValue();
             if (attribute.getName().compareTo("id") != 0) {
@@ -160,6 +159,7 @@ public class EntityManager {
                     saveQuery.append(");");
                 }
             }
+            i++;
         }
         try {
             this.stmt.executeUpdate(saveQuery.toString());
