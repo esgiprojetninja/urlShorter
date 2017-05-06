@@ -1,11 +1,12 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<jsp:useBean id="url" class="models.Url" scope="request" />
+<h1>Url Shorter</h1>
+<p>${pageContext.request.getAttribute("message")}</p>
+<form action="${pageContext.request.contextPath}/" method="post">
+    <input type="text" placeholder="url..." name="url">
+    <button type="submit">save</button>
+</form>
 
-<t:wrapper>
-    <h1>Url Shorter</h1>
-
-    <form action="${pageContext.request.contextPath}/" method="post">
-        <input type="text" placeholder="url..." name="url">
-        <button type="submit">save</button>
-    </form>
-</t:wrapper>
+<div>
+    <h2>Url list</h2>
+</div>

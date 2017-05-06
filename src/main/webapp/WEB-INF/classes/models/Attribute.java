@@ -1,11 +1,7 @@
-package model;
-
+package models;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Created by roland on 01/05/2017.
- */
 public class Attribute {
     private String name;
     private String type;

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>model.Url Shorter</title>
+    <title>Url Shorter</title>
 </head>
 <body>
     <jsp:doBody/>

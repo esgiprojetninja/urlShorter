@@ -1,7 +1,7 @@
-package model;
-
+package models;
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Url extends EntityManager implements Serializable {
     private String base_url;
@@ -24,7 +24,7 @@ public class Url extends EntityManager implements Serializable {
 
     @Override
     public String toString() {
-        return "model.Url{" +
+        return "models.Url{" +
                 "base_url='" + base_url + '\'' +
                 ", shorter_url='" + shorter_url + '\'' +
                 ", id=" + id +

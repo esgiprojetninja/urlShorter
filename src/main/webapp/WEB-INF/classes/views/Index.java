@@ -1,9 +1,10 @@
-package view;
+package views;
 
-import model.Url;
+import models.Url;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +34,17 @@ public class Index extends HttpServlet {
             req.setAttribute("message", "Url successfully saved !");
         } else if (saved != null && saved.compareTo("false") == 0) {
             req.setAttribute("message", "Error while saving url :/");
+        } else {
+            req.setAttribute("message", "");
+        }
+        try {
+            Url url = new Url();
+            ArrayList<Url> urls = url.getAll(Url.class);
+            for(Url entry : urls) {
+                System.out.println(entry);
+            }
+        } catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+            e.printStackTrace();
         }
         this.getServletContext().getRequestDispatcher("/WEB-INF/index.jsp").forward(req, res);
     }

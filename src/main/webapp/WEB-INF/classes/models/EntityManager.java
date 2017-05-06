@@ -1,19 +1,15 @@
-package model;
-/**
- * Created by roland on 28/04/2017.
- */
-
-import org.w3c.dom.Attr;
-
+package models;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EntityManager {
+class EntityManager {
     private Connection conn = null;
     private Statement stmt = null;
     protected Map<String, Attribute> attributes = new HashMap<>();
+
     private String tableName;
 
     public EntityManager() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
@@ -87,7 +83,6 @@ public class EntityManager {
                     }
                 }
                 createTableQuery.append(");");
-                System.out.println(createTableQuery.toString());
                 this.stmt.executeUpdate(createTableQuery.toString());
             }
         } catch (SQLException e) {
@@ -108,23 +103,25 @@ public class EntityManager {
         this.stmt.close();
     }
 
-    public ArrayList<EntityManager> getAll() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        ArrayList<EntityManager> entities = new ArrayList<>();
+    public <T extends EntityManager> ArrayList<T> getAll(Class<T> type) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
+        ArrayList<T> entities = new ArrayList<>();
         try {
             this.createStatement();
             String listUserQuery = "SELECT * FROM " + this.tableName + " ;";
             ResultSet entitySQLList = this.stmt.executeQuery(listUserQuery);
             while(entitySQLList.next()) {
-                EntityManager entity = new EntityManager(this.tableName);
+                T res = type.getConstructor().newInstance();
                 for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
                     Attribute attribute = entry.getValue();
                     attribute.setValueFromResultSet(entitySQLList);
-                    entity.addAttribute(attribute);
+                    res.addAttribute(attribute);
                 }
-                entities.add(entity);
+                entities.add(res);
             }
             this.closeStatement();
         } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
         return entities;
@@ -167,7 +164,6 @@ public class EntityManager {
             i++;
         }
         try {
-            System.out.println(saveQuery.toString());
             this.stmt.executeUpdate(saveQuery.toString());
             this.closeStatement();
             return true;
