@@ -21,6 +21,12 @@ public class Attribute {
         this.value = value;
     }
 
+    public Attribute (Attribute attribute) {
+        this.name = attribute.name;
+        this.value = attribute.value;
+        this.type = attribute.type;
+    }
+
     public Object getValue() {
         return value;
     }

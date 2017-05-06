@@ -1,4 +1,6 @@
 package models;
+
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -20,6 +22,12 @@ class EntityManager {
         this.setTableName(tableName);
         this.addAttribute(new Attribute("id", "int"));
     }
+
+    public EntityManager(Map<String, Attribute> attributes) throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
+        this.setAttributes(attributes);
+        this.addAttribute(new Attribute("id", "int"));
+    }
+
 
     protected void connect() throws ClassNotFoundException, SQLException, IllegalAccessException, InstantiationException {
         this.conn = null;
@@ -103,6 +111,10 @@ class EntityManager {
         this.stmt.close();
     }
 
+    public Map<String, Attribute> getAttributes() {
+        return attributes;
+    }
+
     public <T extends EntityManager> ArrayList<T> getAll(Class<T> type) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
         ArrayList<T> entities = new ArrayList<>();
         try {
@@ -112,16 +124,14 @@ class EntityManager {
             while(entitySQLList.next()) {
                 T res = type.getConstructor().newInstance();
                 for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
-                    Attribute attribute = entry.getValue();
+                    Attribute attribute = new Attribute(entry.getValue());
                     attribute.setValueFromResultSet(entitySQLList);
                     res.addAttribute(attribute);
                 }
                 entities.add(res);
             }
             this.closeStatement();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (SQLException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return entities;

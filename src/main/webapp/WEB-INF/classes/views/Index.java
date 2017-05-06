@@ -40,8 +40,9 @@ public class Index extends HttpServlet {
         try {
             Url url = new Url();
             ArrayList<Url> urls = url.getAll(Url.class);
+            req.setAttribute("urls", urls);
             for(Url entry : urls) {
-                System.out.println(entry);
+                System.out.println(entry.getAttributes().get("base_url").getValue());
             }
         } catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
             e.printStackTrace();
