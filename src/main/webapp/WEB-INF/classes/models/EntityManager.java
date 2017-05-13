@@ -15,35 +15,38 @@ class EntityManager {
     private String tableName;
 
     public EntityManager() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
+        this.conn = null;
         this.addAttribute(new Attribute("id", "int"));
     }
 
     public EntityManager(String tableName) throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
+        this.conn = null;
         this.setTableName(tableName);
         this.addAttribute(new Attribute("id", "int"));
     }
 
     public EntityManager(Map<String, Attribute> attributes) throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
+        this.conn = null;
         this.setAttributes(attributes);
         this.addAttribute(new Attribute("id", "int"));
     }
 
 
     protected void connect() throws ClassNotFoundException, SQLException, IllegalAccessException, InstantiationException {
-        this.conn = null;
-        try {
-            // Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            this.conn = DriverManager.getConnection("jdbc:mysql://192.168.10.10/url_shorter?" + "user=shortenme&password=secret");
-            this.createTableIfNotExist();
-        } catch (ClassNotFoundException e) {
-            System.err.println("Driver non chargé !");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.err.println("Erreur SQL !");
-            e.printStackTrace();
-        } catch (IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
+        if (this.conn == null) {
+            try {
+                Class.forName("com.mysql.jdbc.Driver").newInstance();
+                this.conn = DriverManager.getConnection("jdbc:mysql://192.168.10.10/url_shorter?" + "user=shortenme&password=secret");
+                this.createTableIfNotExist();
+            } catch (ClassNotFoundException e) {
+                System.err.println("Driver non chargé !");
+                e.printStackTrace();
+            } catch (SQLException e) {
+                System.err.println("Erreur SQL !");
+                e.printStackTrace();
+            } catch (IllegalAccessException | InstantiationException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -61,7 +64,12 @@ class EntityManager {
         this.attributes.put(attribute.getName(), attribute);
     }
 
-    public void createTableIfNotExist () throws SQLException {
+    public void createTableIfNotExist () throws SQLException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+        try {
+            this.connect();
+        } catch (ClassNotFoundException | SQLException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
         this.createStatement();
         String strQuery = "SHOW TABLES;";
         ResultSet rsTables = this.stmt.executeQuery(strQuery);
@@ -91,6 +99,7 @@ class EntityManager {
                     }
                 }
                 createTableQuery.append(");");
+                this.createStatement();
                 this.stmt.executeUpdate(createTableQuery.toString());
             }
         } catch (SQLException e) {
@@ -100,15 +109,20 @@ class EntityManager {
     }
 
     public void find(int id) throws SQLException {
-        this.createStatement();
         String queryString = String.format("SELECT * from " + this.tableName + " WHERE id = '%d'", id);
         ResultSet sqlQuery = this.stmt.executeQuery(queryString);
+        try {
+            this.connect();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
+        this.createStatement();
         if (sqlQuery.next()) {
             for (Map.Entry<String, Attribute> entry : this.attributes.entrySet()) {
                 entry.getValue().setValueFromResultSet(sqlQuery);
             }
         }
-        this.stmt.close();
+        this.closeStatement();
     }
 
     public Map<String, Attribute> getAttributes() {
@@ -118,6 +132,7 @@ class EntityManager {
     public <T extends EntityManager> ArrayList<T> getAll(Class<T> type) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
         ArrayList<T> entities = new ArrayList<>();
         try {
+            this.connect();
             this.createStatement();
             String listUserQuery = "SELECT * FROM " + this.tableName + " ;";
             ResultSet entitySQLList = this.stmt.executeQuery(listUserQuery);
@@ -137,7 +152,61 @@ class EntityManager {
         return entities;
     }
 
-    public boolean save() throws SQLException {
+    public int update () throws SQLException {
+        try {
+            this.connect();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
+        this.createStatement();
+        StringBuilder updateQuery = new StringBuilder();
+        updateQuery.append("UPDATE ").append(this.tableName).append(" SET ");
+        int attributeListLength = this.attributes.size();
+        int i = 1;
+        for (Map.Entry<String, Attribute> entry: this.attributes.entrySet()) {
+            Attribute attribute = entry.getValue();
+            if (attribute.getName().compareTo("id") != 0) {
+                updateQuery
+                        .append(attribute.getName())
+                        .append("=");
+                if (attribute.getType().compareTo("varchar") == 0 ||
+                        attribute.getType().compareTo("longtext") == 0) {
+                    updateQuery.append("'").append(attribute.getValue()).append("'");
+                } else {
+                    updateQuery.append(attribute.getValue());
+                }
+                if (i < attributeListLength) {
+                    updateQuery.append(", ");
+                } else {
+                    updateQuery.append(" ");
+                }
+            }
+            i++;
+        }
+        updateQuery
+                .append("WHERE id=")
+                .append(this.getAttributes().get("id").getValue())
+                .append(";");
+        try {
+            this.stmt.executeUpdate(updateQuery.toString(), Statement.RETURN_GENERATED_KEYS);
+            this.closeStatement();
+            return (Integer) this.getAttributes().get("id").getValue();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            this.closeStatement();
+            return 0;
+        }
+    }
+
+    public int save() throws SQLException {
+        if (this.getAttributes().get("id").getValue() != null) {
+            return this.update();
+        }
+        try {
+            this.connect();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
         this.createStatement();
         StringBuilder saveQuery = new StringBuilder("INSERT INTO " + this.tableName + " (");
         Integer attributeListLength = this.attributes.size();
@@ -173,15 +242,20 @@ class EntityManager {
             }
             i++;
         }
+        int id = 0;
         try {
-            this.stmt.executeUpdate(saveQuery.toString());
+            this.stmt.executeUpdate(saveQuery.toString(), Statement.RETURN_GENERATED_KEYS);
+            ResultSet gg = stmt.getGeneratedKeys();
+            if (gg.next()) {
+                id =  gg.getInt(1);
+                this.find(id);
+            }
             this.closeStatement();
-            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             this.closeStatement();
-            return false;
         }
+        return id;
     }
 
     private void closeStatement() {

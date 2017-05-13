@@ -58,7 +58,6 @@ public class Attribute {
     }
 
     public String getSQLColumnConstructor () {
-        System.out.println(this.type);
         switch (this.type) {
             case "int":
                 return "INT(6)";

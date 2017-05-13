@@ -2,6 +2,7 @@ package models;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Url extends EntityManager implements Serializable {
     private String base_url;
@@ -15,11 +16,6 @@ public class Url extends EntityManager implements Serializable {
         this.addAttribute(new Attribute("base_url", "longtext"));
         this.addAttribute(new Attribute("shorter_url", "varchar"));
         this.addAttribute(new Attribute("user_id", "int"));
-        try {
-            this.connect();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
     }
 
     @Override
@@ -63,5 +59,27 @@ public class Url extends EntityManager implements Serializable {
 
     public void setUser_id(Integer user_id) {
         this.user_id = user_id;
+    }
+
+    public int save() throws SQLException {
+        id = 0;
+        try {
+            int id = super.save();
+            if (id != 0) {
+                char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+                StringBuilder sb = new StringBuilder();
+                sb.append(id);
+                Random random = new Random();
+                for (int i = 0; i < 7; i++) {
+                    char c = chars[random.nextInt(chars.length)];
+                    sb.append(c);
+                }
+                this.getAttributes().get("shorter_url").setValue(sb.toString());
+                super.save();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
     }
 }
