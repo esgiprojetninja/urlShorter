@@ -11,8 +11,16 @@
         <servlet-name>Index</servlet-name>
         <servlet-class>views.Index</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>UrlMapper</servlet-name>
+        <servlet-class>views.UrlMapper</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Index</servlet-name>
         <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UrlMapper</servlet-name>
+        <url-pattern>/urls/*</url-pattern>
     </servlet-mapping>
 </web-app>
