@@ -190,7 +190,7 @@ class EntityManager {
         try {
             this.stmt.executeUpdate(updateQuery.toString(), Statement.RETURN_GENERATED_KEYS);
             this.closeStatement();
-            return (Integer) this.getAttributes().get("id").getValue();
+            return (int) this.getAttributes().get("id").getValue();
         } catch (SQLException e) {
             e.printStackTrace();
             this.closeStatement();

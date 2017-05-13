@@ -75,7 +75,7 @@ public class Url extends EntityManager implements Serializable {
                     sb.append(c);
                 }
                 this.getAttributes().get("shorter_url").setValue(sb.toString());
-                super.save();
+                return super.save();
             }
         } catch (SQLException e) {
             e.printStackTrace();
