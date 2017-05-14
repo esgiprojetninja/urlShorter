@@ -110,16 +110,36 @@ class EntityManager {
 
     public void find(int id) throws SQLException {
         String queryString = String.format("SELECT * from " + this.tableName + " WHERE id = '%d'", id);
+        try {
+            this.connect();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
         ResultSet sqlQuery = this.stmt.executeQuery(queryString);
+        this.createStatement();
+        if (sqlQuery.next()) {
+            for (Map.Entry<String, Attribute> entry : this.attributes.entrySet()) {
+                entry.getValue().setValueFromResultSet(sqlQuery);
+            }
+        }
+        this.closeStatement();
+    }
+
+    public void findBy(String column, String value) throws SQLException {
+        String queryString = String.format(
+                "SELECT * from " + this.tableName + " WHERE " + column + " = '%s'", value
+        );
         try {
             this.connect();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
         this.createStatement();
+        ResultSet sqlQuery = this.stmt.executeQuery(queryString);
         if (sqlQuery.next()) {
             for (Map.Entry<String, Attribute> entry : this.attributes.entrySet()) {
                 entry.getValue().setValueFromResultSet(sqlQuery);
+                System.out.println(entry.getValue().getValue());
             }
         }
         this.closeStatement();

@@ -1,10 +1,13 @@
 package views;
 
+import models.Url;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Created by roland on 13/05/2017.
@@ -15,7 +18,16 @@ public class UrlMapper extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        req.setAttribute("pathinfo", req.getRequestURI());
-        this.getServletContext().getRequestDispatcher("/WEB-INF/mapper.jsp").forward(req, res);
+        String urlInPath = req.getRequestURI().replace("/urls/", "");
+        Url url = null;
+        try {
+            url = new Url();
+            url.findBy("shorter_url", urlInPath);
+        } catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        if (url != null) {
+            res.sendRedirect((String)url.getAttributes().get("base_url").getValue());
+        }
     }
 }
