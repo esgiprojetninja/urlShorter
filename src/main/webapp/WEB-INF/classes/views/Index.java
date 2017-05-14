@@ -44,6 +44,6 @@ public class Index extends HttpServlet {
         } catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
             e.printStackTrace();
         }
-        this.getServletContext().getRequestDispatcher("/WEB-INF/index.jsp").forward(req, res);
+        this.getServletContext().getRequestDispatcher("/WEB-INF/classes/templates/Index.jsp").forward(req, res);
     }
 }

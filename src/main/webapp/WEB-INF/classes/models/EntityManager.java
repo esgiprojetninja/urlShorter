@@ -139,7 +139,6 @@ class EntityManager {
         if (sqlQuery.next()) {
             for (Map.Entry<String, Attribute> entry : this.attributes.entrySet()) {
                 entry.getValue().setValueFromResultSet(sqlQuery);
-                System.out.println(entry.getValue().getValue());
             }
         }
         this.closeStatement();
