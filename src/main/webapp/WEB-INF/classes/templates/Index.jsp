@@ -15,15 +15,15 @@
     <div class="col-sm-6">
         <% if (request.getSession().getAttribute("user_id") != null) { %>
             <h3>Hello <%= request.getSession().getAttribute("user_name")%></h3>
-            <button class="btn btn-danger btn-xs">Logout</button>
+            <a class="btn btn-danger btn-xs" href="<%= request.getContextPath()%>/logout">Logout</a>
         <% }  else  {%>
             <p>You can create an account in order to save and manage your urls.</p>
             <div class="row">
                 <div class="col-sm-6">
-                    <p>Login</p>
+                    <h4>Login</h4>
                     <form action="<%= request.getContextPath()%>/login" method="post">
                         <div class="for-group">
-                            <input type="text" name="email" placeholder="Email..." class="form-control">
+                            <input type="text" name="name" placeholder="Name..." class="form-control">
                         </div>
                         <div class="for-group">
                             <input type="password" name="pwd" placeholder="Password..." class="form-control">
@@ -32,10 +32,25 @@
                     </form>
                 </div>
                 <div class="col-sm-6">
-                    <p>Subscribe</p>
+                    <h4>Subscribe</h4>
+                    <p>
+                        <% if (request.getParameter("userExist") != null &&
+                                request.getParameter("userExist").compareTo("true") == 0) { %>
+                        Name already exist
+                        <% } else if (request.getParameter("emptyInput") != null &&
+                                request.getParameter("emptyInput").compareTo("true") == 0) { %>
+                        Please fill both fields
+                        <% } else if (request.getParameter("userSaved") != null &&
+                                request.getParameter("userSaved").compareTo("true") == 0) { %>
+                        User Saved
+                        <% } else if (request.getParameter("userSaved") != null &&
+                                request.getParameter("userSaved").compareTo("false") == 0) { %>
+                        Problem while saving user
+                        <% } %>
+                    </p>
                     <form action="<%= request.getContextPath()%>/subscribe" method="post">
                         <div class="for-group">
-                            <input type="text" name="email" placeholder="Email..." class="form-control">
+                            <input type="text" name="name" placeholder="Name..." class="form-control">
                         </div>
                         <div class="for-group">
                             <input type="password" name="pwd" placeholder="Password..." class="form-control">

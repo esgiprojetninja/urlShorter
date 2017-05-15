@@ -125,7 +125,8 @@ class EntityManager {
         this.closeStatement();
     }
 
-    public void findBy(String column, String value) throws SQLException {
+    public int findBy(String column, String value) throws SQLException {
+        int id = 0;
         String queryString = String.format(
                 "SELECT * from " + this.tableName + " WHERE " + column + " = '%s'", value
         );
@@ -140,8 +141,10 @@ class EntityManager {
             for (Map.Entry<String, Attribute> entry : this.attributes.entrySet()) {
                 entry.getValue().setValueFromResultSet(sqlQuery);
             }
+            id =  sqlQuery.getInt(1);
         }
         this.closeStatement();
+        return id;
     }
 
     public Map<String, Attribute> getAttributes() {

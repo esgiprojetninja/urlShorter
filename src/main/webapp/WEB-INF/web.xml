@@ -15,6 +15,18 @@
         <servlet-name>UrlMapper</servlet-name>
         <servlet-class>views.UrlMapper</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Login</servlet-name>
+        <servlet-class>views.Login</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Subscribe</servlet-name>
+        <servlet-class>views.Subscribe</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Logout</servlet-name>
+        <servlet-class>views.Logout</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Index</servlet-name>
         <url-pattern>/</url-pattern>
@@ -22,6 +34,18 @@
     <servlet-mapping>
         <servlet-name>UrlMapper</servlet-name>
         <url-pattern>/urls/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Login</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Subscribe</servlet-name>
+        <url-pattern>/subscribe</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Logout</servlet-name>
+        <url-pattern>/logout</url-pattern>
     </servlet-mapping>
 </web-app>
 
