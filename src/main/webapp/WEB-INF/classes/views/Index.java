@@ -17,6 +17,11 @@ public class Index extends HttpServlet {
         try {
             Url newUrl = new Url();
             newUrl.setBase_url(url);
+            if (req.getSession().getAttribute("user_id") != null) {
+                newUrl.getAttributes().get("user_id").setValue(
+                        req.getSession().getAttribute("user_id")
+                );
+            }
             if (newUrl.save() != 0) saved = true;
         } catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
@@ -39,7 +44,7 @@ public class Index extends HttpServlet {
         }
         try {
             Url url = new Url();
-            ArrayList<Url> urls = url.getAll(Url.class);
+            ArrayList<Url> urls = url.getAll(Url.class, null, null);
             req.setAttribute("urls", urls);
         } catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
             e.printStackTrace();

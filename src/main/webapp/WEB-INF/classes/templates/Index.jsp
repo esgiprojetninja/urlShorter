@@ -15,6 +15,7 @@
     <div class="col-sm-6">
         <% if (request.getSession().getAttribute("user_id") != null) { %>
             <h3>Hello <%= request.getSession().getAttribute("user_name")%></h3>
+            <a class="btn btn-primary btn-xs" href="<%= request.getContextPath()%>/my-urls">My urls</a>
             <a class="btn btn-danger btn-xs" href="<%= request.getContextPath()%>/logout">Logout</a>
         <% }  else  {%>
             <p>You can create an account in order to save and manage your urls.</p>

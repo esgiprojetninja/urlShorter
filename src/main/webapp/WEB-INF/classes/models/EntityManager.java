@@ -108,21 +108,24 @@ class EntityManager {
         this.closeStatement();
     }
 
-    public void find(int id) throws SQLException {
+    public int find(int id) throws SQLException {
+        int entityId = 0;
         String queryString = String.format("SELECT * from " + this.tableName + " WHERE id = '%d'", id);
         try {
             this.connect();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
-        ResultSet sqlQuery = this.stmt.executeQuery(queryString);
         this.createStatement();
+        ResultSet sqlQuery = this.stmt.executeQuery(queryString);
         if (sqlQuery.next()) {
             for (Map.Entry<String, Attribute> entry : this.attributes.entrySet()) {
                 entry.getValue().setValueFromResultSet(sqlQuery);
             }
+            entityId =  sqlQuery.getInt(1);
         }
         this.closeStatement();
+        return entityId;
     }
 
     public int findBy(String column, String value) throws SQLException {
@@ -151,12 +154,15 @@ class EntityManager {
         return attributes;
     }
 
-    public <T extends EntityManager> ArrayList<T> getAll(Class<T> type) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
+    public <T extends EntityManager> ArrayList<T> getAll(Class<T> type, String where, String value) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
         ArrayList<T> entities = new ArrayList<>();
         try {
             this.connect();
             this.createStatement();
             String listUserQuery = "SELECT * FROM " + this.tableName + " ;";
+            if (where != null && value != null) {
+                listUserQuery = "SELECT * FROM " + this.tableName + " WHERE " + where + "=" + value + ";";
+            }
             ResultSet entitySQLList = this.stmt.executeQuery(listUserQuery);
             while(entitySQLList.next()) {
                 T res = type.getConstructor().newInstance();

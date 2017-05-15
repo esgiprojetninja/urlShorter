@@ -27,6 +27,10 @@
         <servlet-name>Logout</servlet-name>
         <servlet-class>views.Logout</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>MyUrls</servlet-name>
+        <servlet-class>views.MyUrls</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Index</servlet-name>
         <url-pattern>/</url-pattern>
@@ -46,6 +50,10 @@
     <servlet-mapping>
         <servlet-name>Logout</servlet-name>
         <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MyUrls</servlet-name>
+        <url-pattern>/my-urls</url-pattern>
     </servlet-mapping>
 </web-app>
 
